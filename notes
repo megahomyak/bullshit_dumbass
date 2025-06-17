@@ -1,0 +1,15 @@
+llm outdoc format:
+
+<action> <args...>
+
+say <stereo balance, -1..1> <phrase>
+wait <number of seconds, real>
+play <stereo balance> <sound desc>
+FOR THE FUTURE: bgplay <stereo balance> <sound desc> -- will loop the sound until it's bgstopped
+FOR THE FUTURE: bgstop <sound desc>
+
+EXAMPLE:
+say 0.3 finally, it's time to do the maintenance in the extremely dangerous metal-pipes-falling-on-workers'-feet-area!
+wait 2.5
+play -1 metal pipe loudly falling on the floor
+say -1 AW FUCK, MY FOOT!
