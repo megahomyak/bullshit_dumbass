@@ -1,11 +1,30 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import * as fs from "node:fs/promises";
+import * as process from "node:process";
 
 let config = JSON.parse(await fs.readFile("config.json", { encoding: "utf-8" }));
 
 let elevenLabsClient = new ElevenLabsClient({
     apiKey: config["eleven_labs_api_key"],
 });
+
+let ensure = async (fileName, defaultMaker) => {
+    let exists = false;
+    try {
+        await fs.stat(fileName);
+        exists = true;
+    } catch {}
+    if (!exists) {
+        await fs.writeFile(fileName, await defaultMaker());
+    }
+    return fileName;
+};
+
+ensure("script", )
+
+let soxParams = [];
+fs.readFile("script", { encoding: "utf-8" });
+process.execve("sox", soxParams);
 
 let read = async (path, defaultGenerator) => {
     try {
