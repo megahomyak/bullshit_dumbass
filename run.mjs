@@ -31,7 +31,7 @@ let read = async (filePath, options, defaultMaker) => {
 };
 let spawn = (command, args) => new Promise(resolve => childProcess.spawn(command, args).on("exit", resolve));
 
-let script = read("script", { encoding: "utf-8" }, async () => {
+let script = await read("script", { encoding: "utf-8" }, async () => {
     let setting = await fs.readFile("setting", { encoding: "utf-8" });
     return (await groqClient.chat.completions.create({
         messages: [
@@ -56,9 +56,9 @@ let script = read("script", { encoding: "utf-8" }, async () => {
         ],
         model: "llama-3.3-70b-versatile",
     })).choices[0].message.content;
-}).trim();
+});
 let soxParams = [];
-for (let line of script.split("\n")) {
+for (let line of script.trim().split("\n")) {
     let handlers = [
         [/^say\s+(?<phrase>.+)$/, async groups => {
             await fs.mkdir("sayings", { recursive: true });
