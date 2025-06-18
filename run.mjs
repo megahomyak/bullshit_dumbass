@@ -83,7 +83,7 @@ let script = await read("script", { encoding: "utf-8" }, async () => {
                 role: "system",
                 content: "The user will provide a setting for a one-sided roleplay document; please, respond ONLY WITH text in the following format (with commands being unordered and possibly repeating):\n"
                     + "\n"
-                    + "play <sound desc>\n"
+                    + "play <description of SHORT sound>\n"
                     + "wait <number of seconds, real>\n"
                     + "say <phrase>\n"
                     + "\n"
