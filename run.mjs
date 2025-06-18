@@ -81,18 +81,24 @@ let script = await read("script", { encoding: "utf-8" }, async () => {
         messages: [
             {
                 role: "system",
-                content: "The user will provide a setting for a one-sided roleplay document; please, respond ONLY WITH text in the following format (with commands being unordered and possibly repeating):\n"
+                content: "The user will provide a setting for a one-sided roleplay document; please, respond ONLY WITH text with commands in one the following formats:\n"
                     + "\n"
-                    + "play <description of SHORT sound>\n"
-                    + "wait <number of seconds, real>\n"
-                    + "say <phrase>\n"
+                    + "FORMAT 1: play <duration of sound in seconds, must be at least 0.5 and at most 22> <description of sound>\n"
+                    + "FORMAT 2: wait <number of seconds, real>\n"
+                    + "FORMAT 3: say <phrase>\n"
                     + "\n"
-                    + "EXAMPLE:\n"
+                    + "RESPONSE EXAMPLE:\n"
                     + "say finally!"
                     + "say it's time to do the maintenance in the extremely dangerous metal-pipes-falling-on-workers'-feet-area!\n"
                     + "wait 2.5\n"
-                    + "play metal pipe loudly falling on the floor\n"
-                    + "say AW FUCK, MY FOOT!",
+                    + "play 1.5 metal pipe loudly falling on the floor\n"
+                    + "say AW FUCK, MY FOOT!\n"
+                    + "wait 1\n"
+                    + "say stupid pipe...\n"
+                    + "play 1 door closing\n"
+                    + "say I hope this will be the last time this happens...\n"
+                    + "\n"
+                    + "Please, keep in mind that it will be much better if you use commands in a randomized order, which is possible and encouraged"
             },
             {
                 role: "user",
@@ -125,16 +131,15 @@ for (let line of script.trim().split("\n")) {
                 await spawn("sox", `-n -c 2 -r 48000 ${path} trim 0.0 ${groups.timeSeconds}`.split(" "));
             });
         }],
-        [/^play\s+(?<soundDescription>.+)$/, async groups => {
+        [/^play\s+(?<durationSeconds>\d*.?\d+)\s+(?<soundDescription>.+)$/, async groups => {
             await fsPromises.mkdir("sounds", { recursive: true });
             return await ensure("sounds/" + Buffer.from(groups.soundDescription).toString("base64url") + ".wav", async path => {
                 await fsPromises.writeFile(
                     path + ".opus",
-                    await elevenLabsClient.textToSoundEffects.convert({ text: groups.soundDescription, promptInfluence: 1, outputFormat: "opus_48000_192" }),
+                    await elevenLabsClient.textToSoundEffects.convert({ durationSeconds: parseFloat(groups.durationSeconds), text: groups.soundDescription, promptInfluence: 1, outputFormat: "opus_48000_192" }),
                 );
                 await spawn("ffmpeg", `-i ${path}.opus -ar 48000 ${path}`.split(" "));
             });
-            return await ensureWrite("sounds/" + Buffer.from(groups.soundDescription).toString("base64url"), {}, async () => await elevenLabsClient.textToSoundEffects.convert({ text: groups.soundDescription, promptInfluence: 1, outputFormat: "opus_48000_192" }));
         }],
     ];
     await (async () => {
