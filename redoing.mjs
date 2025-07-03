@@ -19,7 +19,6 @@ let make = async (filepath, maker) => {
 
 // Executes the provided command with the provided args, throws an error if the execution fails, returns the contents of the standard output as a Buffer. Example: await exec("ls", ["-l"])
 let exec = async (command, args) => new Promise((resolve, reject) => {
-    console.log(command + " " + args.join(" "));
     let process = childProcess.spawn(command, args, {
         stdio: [
             "ignore",
@@ -51,6 +50,7 @@ let compile = async (infiles, outduration, outfilepath) => await exec("ffmpeg", 
             filterComplex += `[${i}]`;
             let balanceLeftMono = n => `${balanceLeft(n)}*c0+${balanceLeft(n)}*c1`;
             filterComplex += `pan=stereo|c0=${balanceLeftMono(infile.pan)}|c1=${balanceLeftMono(-infile.pan)}`;
+            filterComplex += `,adeclick`;
             filterComplex += `,atrim=end=${infile.duration}`;
             filterComplex += `,adelay=delays=${infile.start * 1000}:all=1`;
             filterComplex += outputLabel + ";";
