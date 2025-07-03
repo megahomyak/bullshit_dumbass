@@ -36,19 +36,20 @@ let exec = async (command, args) => new Promise((resolve, reject) => {
 });
 
 // Compiles a list of input audio files into one audio file using ffmpeg. The outfile must be OPUS. Returns nothing. Example: await compile([{ start: 3.3/*seconds*/, pan: -1/*from -1 for "all to left" to 1 for "all to right"*/, path: "in1.mp3", duration: 5.6/*seconds*/ }, { start: 0, duration: 8, pan: 0, path: "in2.opus" }], 15.86/*seconds*/, "outfile.opus")
-let compile = async (infiles, outduration, outfilepath) => console.log(infiles) || await exec("ffmpeg", [
+let compile = async (infiles, outduration, outfilepath) => await exec("ffmpeg", [
     "-f", "lavfi",
     "-i", `anullsrc=cl=stereo:sample_rate=48000:d=${outduration}`,
     ...infiles.flatMap(infile => ["-i", infile.path]),
     "-filter_complex", (() => {
-        let balanceLeft = n => 1 - Math.max(0, n);
+        const volumeMultiplier = 4 /* otherwise it's too quiet */;
+        let balanceLeft = n => (1 - Math.max(0, n)) * volumeMultiplier;
         let outputLabels = [];
         let filterComplex = "";
         infiles.forEach((infile, i) => {
             i += 1;
             let outputLabel = `[processed${i}]`;
             filterComplex += `[${i}]`;
-            filterComplex += `pan=stereo|c0=${balanceLeft(infile.pan)}*c0|c1=${balanceLeft(-infile.pan)}*c1`;
+            filterComplex += `pan=stereo|c0=${balanceLeft(infile.pan)}*c0|c1=${balanceLeft(-infile.pan)}*c0`;
             filterComplex += `,atrim=end=${infile.duration}`;
             filterComplex += `,adelay=delays=${infile.start * 1000}:all=1`;
             filterComplex += outputLabel + ";";
