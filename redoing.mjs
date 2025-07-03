@@ -51,12 +51,6 @@ let compile = async (infiles, outduration, outfilepath) => await exec("ffmpeg", 
             let balanceLeftMono = n => `${balanceLeft(n)}*c0+${balanceLeft(n)}*c1`;
             filterComplex += `pan=stereo|c0=${balanceLeftMono(infile.pan)}|c1=${balanceLeftMono(-infile.pan)}`;
             filterComplex += `,adeclick`;
-            if (infile.doFadeIn) {
-                filterComplex += `,afade=t=in:d=${infile.duration}`;
-            }
-            if (infile.doFadeOut) {
-                filterComplex += `,afade=t=out:d=${infile.duration}`;
-            }
             filterComplex += `,atrim=end=${infile.duration}`;
             filterComplex += `,adelay=delays=${infile.start * 1000}:all=1`;
             filterComplex += outputLabel + ";";
@@ -244,21 +238,17 @@ let makeFileName = string => {
             {
                 role: "system",
                 content: [
-                    "Turn the story sent by the user into a document of the following format: on each line, there should be one of the following commands:",
+                    "Turn the roleplay sent by the user into a document of the following format: on each line, there should be one of the following commands:",
                     "* voice {panning, from -1 for \"all to left\" to 1 for \"all to right\"} {phrase} - starts a voice saying the phrase from the character, NOT FROM THE NARRATOR (you MUST NOT voice the narrator, everything should be expressed as if it just happens without any narration), MUST be only literal, goes to later commands only after the voice ends",
                     "* sound {panning, from -1 for \"all to left\" to 1 for \"all to right\"} {duration in seconds} {sound description} - starts the specified sound, MUST have a literal description, goes to later commands only after the sound ends",
-                    "* bgstart {panning, from -1 for \"all to left\" to 1 for \"all to right\"} {sound description} - starts playing the specified background sound, MUST have a literal description, goes to later commands immediately",
-                    "* bgstop {sound description} - stops playing a previously mentioned background sound, goes to later commands immediately",
                     "* wait {time in seconds, floating point} - waits the specified amount of time before going to later commands",
                     "",
                     "EXAMPLE:",
                     "voice 0 now i'm about to go to the left and open the window",
                     "sound -0.5 3 footsteps",
                     "sound -1 1 opening a window",
-                    "bgstart -1 sound of rain",
                     "wait 2",
                     "voice -0.8 actually, it's too cold outside, i think it should be closed",
-                    "bgstop sound of rain",
                     "sound -1 closing a window",
                 ].join("\n"),
             },
@@ -295,15 +285,11 @@ let makeFileName = string => {
                         relativeStart: infilesShort.length * oneDuration,
                     });
                 }
-                infilesShort[0].doFadeIn = true;
-                infilesShort[infilesShort.length - 1].doFadeOut = true;
                 infiles.push(...infilesShort.map(infileShort => ({
                     path: filepath,
                     pan: panning,
                     start: startTime + infileShort.relativeStart,
                     duration: infileShort.duration,
-                    doFadeIn: infileShort.doFadeIn,
-                    doFadeOut: infileShort.doFadeOut,
                 })));
             };
         };
