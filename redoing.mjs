@@ -51,6 +51,12 @@ let compile = async (infiles, outduration, outfilepath) => await exec("ffmpeg", 
             let balanceLeftMono = n => `${balanceLeft(n)}*c0+${balanceLeft(n)}*c1`;
             filterComplex += `pan=stereo|c0=${balanceLeftMono(infile.pan)}|c1=${balanceLeftMono(-infile.pan)}`;
             filterComplex += `,adeclick`;
+            if (infile.doFadeIn) {
+                filterComplex += `,afade=t=in:d=${infile.duration}`;
+            }
+            if (infile.doFadeOut) {
+                filterComplex += `,afade=t=out:d=${infile.duration}`;
+            }
             filterComplex += `,atrim=end=${infile.duration}`;
             filterComplex += `,adelay=delays=${infile.start * 1000}:all=1`;
             filterComplex += outputLabel + ";";
@@ -224,7 +230,7 @@ let makeFileName = string => {
         await fsPromises.writeFile(filepath, await textCompleter([
             {
                 role: "system",
-                content: "Please, write out a story as the user requests. The story must be calm and slowly paced, as if the reader is tired. The story should be entirely unidirectional: there must be no interactions from the reader except implied movement (for example, following someone somewhere *per their request*), but no communication from the reader should occur, verbal or non-verbal. You can insert various actions, movement, sounds or other non-verbal details. The story must be very objective, with no descriptions of subjective internal feelings or some abstract descriptions.",
+                content: "Please, write out a roleplay as the user requests. The roleplay must be calm and slowly paced, as if the reader is tired. The roleplay should be entirely unidirectional: there must be no interactions from the reader except implied movement (for example, following someone somewhere *per their request*), but no communication from the reader should occur, verbal or non-verbal. You can insert various actions, movement, sounds or other non-verbal details. The roleplay must be very objective, with no descriptions of subjective internal feelings or some abstract descriptions.",
             },
             {
                 role: "user",
@@ -289,11 +295,15 @@ let makeFileName = string => {
                         relativeStart: infilesShort.length * oneDuration,
                     });
                 }
+                infilesShort[0].doFadeIn = true;
+                infilesShort[infilesShort.length - 1].doFadeOut = true;
                 infiles.push(...infilesShort.map(infileShort => ({
                     path: filepath,
                     pan: panning,
                     start: startTime + infileShort.relativeStart,
                     duration: infileShort.duration,
+                    doFadeIn: infileShort.doFadeIn,
+                    doFadeOut: infileShort.doFadeOut,
                 })));
             };
         };
