@@ -49,7 +49,8 @@ let compile = async (infiles, outduration, outfilepath) => await exec("ffmpeg", 
             i += 1;
             let outputLabel = `[processed${i}]`;
             filterComplex += `[${i}]`;
-            filterComplex += `pan=stereo|c0=${balanceLeft(infile.pan)}*c0|c1=${balanceLeft(-infile.pan)}*c0`;
+            let balanceLeftMono = n => `${balanceLeft(n)}*c0+${balanceLeft(n)}*c1`;
+            filterComplex += `pan=stereo|c0=${balanceLeftMono(infile.pan)}|c1=${balanceLeftMono(-infile.pan)}`;
             filterComplex += `,atrim=end=${infile.duration}`;
             filterComplex += `,adelay=delays=${infile.start * 1000}:all=1`;
             filterComplex += outputLabel + ";";
