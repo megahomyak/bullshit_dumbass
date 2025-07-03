@@ -48,9 +48,9 @@ let compile = async (infiles, outduration, outfilepath) => console.log(infiles) 
             i += 1;
             let outputLabel = `[processed${i}]`;
             filterComplex += `[${i}]`;
-            filterComplex += `adelay=${infile.start}s:all=1`;
-            filterComplex += `,pan=stereo|c0=${balanceLeft(infile.pan)}*c0|c1=${balanceLeft(-infile.pan)}*c1`;
+            filterComplex += `pan=stereo|c0=${balanceLeft(infile.pan)}*c0|c1=${balanceLeft(-infile.pan)}*c1`;
             filterComplex += `,atrim=end=${infile.duration}`;
+            filterComplex += `,adelay=delays=${infile.start * 1000}:all=1`;
             filterComplex += outputLabel + ";";
             outputLabels.push(outputLabel);
         });
@@ -274,8 +274,7 @@ let makeFileName = string => {
                 let endTime = currentTime;
                 let totalDuration = endTime - startTime;
                 let infilesShort = [];
-                console.log("AAAAAAAAAAAAAAAAAAAAAA", totalDuration, oneDuration);
-                new Array(Math.floor(totalDuration / oneDuration)).forEach((_, i) => {
+                Array.from({ length: Math.floor(totalDuration / oneDuration) }).forEach((_, i) => {
                     infilesShort.push({
                         duration: oneDuration,
                         relativeStart: i * oneDuration,
