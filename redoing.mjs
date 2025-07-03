@@ -304,7 +304,6 @@ let makeFileName = string => {
                     let filepath = await make(sounds.file(makeFileName(soundDescription)), async filepath => {
                         await soundMaker(soundDescription, duration, filepath);
                     });
-                    let duration = await getDuration(filepath);
                     infiles.push({
                         path: filepath,
                         duration,
