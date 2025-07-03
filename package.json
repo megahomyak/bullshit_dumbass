@@ -1,6 +1,5 @@
 {
   "name": "bullshit_dumbass",
-  "version": "not_tracked",
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.2.0",
     "groq-sdk": "^0.25.0"
